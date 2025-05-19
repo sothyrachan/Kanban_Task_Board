@@ -1,13 +1,70 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
+    <title>Kanban Task Board</title>
+    <link href="./output.css" rel="stylesheet" />
   </head>
   <body>
-    <div id="app"></div>
+    <header class="site-header">
+      <h1>Kanban Task Board</h1>
+      <p>Organize your tasks by dragging them between columns</p>
+    </header>
+
+    <main class="kanban-board" aria-label="Kanban Board">
+      <section class="task-form" aria-label="Add New Task">
+        <form id="task-form">
+          <fieldset>
+            <legend>Add New Task</legend>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required />
+
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="2"></textarea>
+
+            <label for="status">Status:</label>
+            <select id="status" name="status">
+              <option value="todo">To Do</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+
+            <label for="priority">Priority:</label>
+            <select id="priority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+
+            <button type="submit">Add Task</button>
+          </fieldset>
+        </form>
+      </section>
+
+      <section class="kanban-columns" aria-label="Task Columns">
+        <div class="column" data-status="todo">
+          <h2>To Do</h2>
+          <div class="task-list" id="todo-tasks"></div>
+        </div>
+
+        <div class="column" data-status="in-progress">
+          <h2>In Progress</h2>
+          <div class="task-list" id="in-progress-tasks"></div>
+        </div>
+
+        <div class="column" data-status="done">
+          <h2>Done</h2>
+          <div class="task-list" id="done-tasks"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; 2025 Sothyra Chan. All rights reserved.</p>
+    </footer>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
