@@ -11,3 +11,6 @@ const todoTaskDiv = document.getElementById("todo-tasks") as HTMLDivElement;
 const inPorgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
 const doneTaskDiv = document.getElementById("done-tasks") as HTMLDivElement;
 
+const tasksData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data") as string) : [];
+
+let trackCurrentTask = {};

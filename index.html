@@ -18,6 +18,7 @@
         <button id="task-btn">+ Add Task</button>
         <form id="task-form">
           <fieldset>
+            <button id="close-form-btn">X</button>
             <legend>Add New Task</legend>
             <label for="title">Title:</label>
             <input type="text" id="title" name="title" required />
@@ -42,6 +43,15 @@
             <button type="submit" id="addNewTask-btn">Add Task</button>
           </fieldset>
         </form>
+        <dialog id="confirm-close-dialog">
+          <form method="dialog">
+            <p>Discard unsaved changes?</p>
+            <div id="confirm-close-dialog-container">
+              <button id="cancel-dialog-btn">Cancel</button>
+              <button id="discard-dialog-btn">Discard</button>
+            </div>
+          </form>
+        </dialog>
       </section>
 
       <section class="kanban-columns" aria-label="Task Columns">
