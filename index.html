@@ -15,10 +15,10 @@
 
     <main class="kanban-board" aria-label="Kanban Board">
       <section class="task-form" aria-label="Add New Task">
-        <button id="task-btn">+ Add Task</button>
-        <form id="task-form">
+        <button id="open-task-form-btn">Add Task</button>
+        <form class="hidden" id="task-form">
           <fieldset>
-            <button id="close-form-btn">X</button>
+            <button type="button" id="close-form-btn">X</button>
             <legend>Add New Task</legend>
             <label for="title">Title:</label>
             <input type="text" id="title" name="title" required />
