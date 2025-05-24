@@ -39,7 +39,24 @@ const addOrUpdateTask = () => {
         taskData[dataArrIndex] = taskObj;
     }
 
-    localStorage.setItem("data", JSON.stringify(taskData)); 
+    localStorage.setItem("data", JSON.stringify(taskData));
+    updateTaskContainer(); 
+};
+
+const updateTaskContainer = () => {
+  tasksContainer.innerHTML = "";
+
+  // loop through the taskData array and add the tasks to the DOM
+  taskData.forEach(({ id, title, date, description }) => {
+    tasksContainer.innerHTML += `
+        <div class="task" id="${id}">
+          <p><strong>Title:</strong> ${title}</p>
+          <p><strong>Description:</strong> ${description}</p>
+          <button onclick="editTask(this)" type="button" class="btn">Edit</button>
+          <button onclick="deleteTask(this)" type="button" class="btn">Delete</button>
+        </div>
+      `;
+  });
 };
 
 taskForm.addEventListener("submit", (e) => {
