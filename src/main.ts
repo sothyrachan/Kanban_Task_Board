@@ -6,7 +6,8 @@ const titleInput = document.getElementById("title") as HTMLInputElement;
 const descField = document.getElementById("description") as HTMLTextAreaElement;
 const statusOpt = document.getElementById("status") as HTMLSelectElement;
 const priorityOpt = document.getElementById("priority") as HTMLSelectElement;
-const addedTaskBtn = document.getElementById("addNewTask-btn") as HTMLButtonElement;
+const addedOrUpdatedTaskBtn = document.getElementById("addNewTask-btn") as HTMLButtonElement;
+const tasksContainer = document.getElementById("tasks-container") as HTMLDivElement;
 const todoTaskDiv = document.getElementById("todo-tasks") as HTMLDivElement;
 const inPorgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
 const doneTaskDiv = document.getElementById("done-tasks") as HTMLDivElement;
@@ -31,6 +32,8 @@ const addOrUpdateTask = () => {
             .join("-")}-${Date.now()}`,
         title: removeSpecialChars(titleInput.value),
         description: removeSpecialChars(descField.value),
+        status: statusOpt.value,
+        priority: priorityOpt.value,
     };
 
     if (dataArrIndex === -1) {
@@ -41,23 +44,54 @@ const addOrUpdateTask = () => {
 
     localStorage.setItem("data", JSON.stringify(taskData));
     updateTaskContainer(); 
+    //resetTask();
 };
 
 const updateTaskContainer = () => {
   tasksContainer.innerHTML = "";
 
   // loop through the taskData array and add the tasks to the DOM
-  taskData.forEach(({ id, title, date, description }) => {
+  taskData.forEach(({ id, title, description, status, priority }: any) => {
     tasksContainer.innerHTML += `
         <div class="task" id="${id}">
           <p><strong>Title:</strong> ${title}</p>
           <p><strong>Description:</strong> ${description}</p>
-          <button onclick="editTask(this)" type="button" class="btn">Edit</button>
-          <button onclick="deleteTask(this)" type="button" class="btn">Delete</button>
+          <p><strong>Status:</strong> ${status}</p>
+          <p><strong>Priority:</strong> ${priority}</p>
+          <button onclick="${editTask(this)}" type="button" class="btn">Edit</button>
+          <button onclick="${deleteTask(this)}" type="button" class="btn">Delete</button>
         </div>
       `;
   });
 };
+
+const editTask = (buttonEl: any) => {
+    const dataArrIndex = taskData.findIndex(
+        (item: any) => item.id === buttonEl.parentElement.id
+    );
+
+    trackCurrentTask = taskData[dataArrIndex];
+
+    titleInput.value = trackCurrentTask.title;
+    descField.value = trackCurrentTask.description;
+    statusOpt.value = trackCurrentTask.status;
+    priorityOpt.value = trackCurrentTask.priority;
+
+    addedOrUpdatedTaskBtn.innerText = "Update Task";
+
+    taskForm.classList.toggle("hidden");
+};
+
+const deleteTask = (buttonEL: any) => {
+    const dataArrIndex = taskData.findIndex(
+        (item: any) => item.id === buttonEL.parentElement.id
+    );
+    
+    buttonEL.parentElement.remove();
+    taskData.splice(dataArrIndex, 1);
+    localStorage.setItem("data", JSON.stringify(taskData));
+};
+
 
 taskForm.addEventListener("submit", (e) => {
     e.preventDefault();
