@@ -6,7 +6,7 @@ const titleInput = document.getElementById("title") as HTMLInputElement;
 const descField = document.getElementById("description") as HTMLTextAreaElement;
 const statusOpt = document.getElementById("status") as HTMLSelectElement;
 const priorityOpt = document.getElementById("priority") as HTMLSelectElement;
-const addedOrUpdatedTaskBtn = document.getElementById("addNewTask-btn") as HTMLButtonElement;
+const addedOrUpdatedTaskBtn = document.getElementById("add-new-task-btn") as HTMLButtonElement;
 const tasksContainer = document.getElementById("tasks-container") as HTMLDivElement;
 const todoTaskDiv = document.getElementById("todo-tasks") as HTMLDivElement;
 const inPorgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
@@ -58,12 +58,24 @@ const updateTaskContainer = () => {
           <p><strong>Description:</strong> ${description}</p>
           <p><strong>Status:</strong> ${status}</p>
           <p><strong>Priority:</strong> ${priority}</p>
-          <button onclick="${editTask(this)}" type="button" class="btn">Edit</button>
-          <button onclick="${deleteTask(this)}" type="button" class="btn">Delete</button>
+          <button type="button" class="btn">Edit</button>
+          <button type="button" class="btn">Delete</button>
         </div>
       `;
   });
 };
+
+tasksContainer.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+
+    if (target.matches(".btn")) {
+        if (target.textContent === "Edit") {
+            editTask(target);
+        } else if (target.textContent === "Delete") {
+            deleteTask(target);
+        }
+    }
+});
 
 const editTask = (buttonEl: any) => {
     const dataArrIndex = taskData.findIndex(
