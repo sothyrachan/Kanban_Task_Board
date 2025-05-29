@@ -44,7 +44,7 @@ const addOrUpdateTask = () => {
 
     localStorage.setItem("data", JSON.stringify(taskData));
     updateTaskContainer(); 
-    //resetTask();
+    resetTask();
 };
 
 const updateTaskContainer = () => {
@@ -104,6 +104,15 @@ const deleteTask = (buttonEL: any) => {
     localStorage.setItem("data", JSON.stringify(taskData));
 };
 
+const resetTask = () => {
+    addedOrUpdatedTaskBtn.innerText = "Add Task";
+    titleInput.value = "";
+    descField.value = "";
+    statusOpt.value = "";
+    priorityOpt.value = "";
+    trackCurrentTask = {};
+    taskForm.classList.toggle("hidden");
+};
 
 taskForm.addEventListener("submit", (e) => {
     e.preventDefault();
