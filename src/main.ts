@@ -7,7 +7,6 @@ const descField = document.getElementById("description") as HTMLTextAreaElement;
 const statusOpt = document.getElementById("status") as HTMLSelectElement;
 const priorityOpt = document.getElementById("priority") as HTMLSelectElement;
 const addedOrUpdatedTaskBtn = document.getElementById("add-new-task-btn") as HTMLButtonElement;
-const tasksContainer = document.getElementById("tasks-container") as HTMLDivElement;
 const todoTaskDiv = document.getElementById("todo-tasks") as HTMLDivElement;
 const inPorgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
 const doneTaskDiv = document.getElementById("done-tasks") as HTMLDivElement;
