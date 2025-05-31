@@ -47,7 +47,7 @@ const addOrUpdateTask = () => {
 };
 
 const updateTaskContainer = () => {
-  tasksContainer.innerHTML = "";
+  //tasksContainer.innerHTML = "";
 
   // loop through the taskData array and add the tasks to the DOM
   taskData.forEach(({ id, title, description, status, priority }: any) => {
