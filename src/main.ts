@@ -11,6 +11,7 @@ const todoTaskDiv = document.getElementById("todo-tasks") as HTMLDivElement;
 const inPorgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
 const doneTaskDiv = document.getElementById("done-tasks") as HTMLDivElement;
 
+
 const taskData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data") as string) : [];
 
 let trackCurrentTask: any = {};
@@ -23,7 +24,7 @@ const addOrUpdateTask = () => {
     if (!titleInput.value.trim()) return alert("Please input the task title!");
 
     const dataArrIndex = taskData.findIndex((item: any) => item.id === trackCurrentTask.id)
-    
+
     const taskObj: any = {
         id: `${removeSpecialChars(titleInput.value)
             .toLowerCase()
@@ -42,39 +43,57 @@ const addOrUpdateTask = () => {
     }
 
     localStorage.setItem("data", JSON.stringify(taskData));
-    updateTaskContainer(); 
+    updateTaskContainer();
     resetTask();
 };
 
 const updateTaskContainer = () => {
-  //tasksContainer.innerHTML = "";
+    todoTaskDiv.innerHTML = "";
+    inPorgressTaskDiv.innerHTML = "";
+    doneTaskDiv.innerHTML = "";
 
-  // loop through the taskData array and add the tasks to the DOM
-  taskData.forEach(({ id, title, description, status, priority }: any) => {
-    tasksContainer.innerHTML += `
+    // loop through the taskData array and add the tasks to the DOM
+    taskData.forEach(({ id, title, description, status, priority }: any) => {
+        const taskElementContainer = `
         <div class="task" id="${id}">
           <p><strong>Title:</strong> ${title}</p>
           <p><strong>Description:</strong> ${description}</p>
           <p><strong>Status:</strong> ${status}</p>
           <p><strong>Priority:</strong> ${priority}</p>
-          <button type="button" class="btn">Edit</button>
-          <button type="button" class="btn">Delete</button>
+          <button type="button" class="edit-btn">Edit</button>
+          <button type="button" class="delete-btn">Delete</button>
         </div>
       `;
-  });
+
+    switch (status) {
+        case "todo":
+            todoTaskDiv.innerHTML += taskElementContainer;
+            break;
+        case "in-progress":
+            inPorgressTaskDiv.innerHTML += taskElementContainer;
+            break;
+        case "done":
+            doneTaskDiv.innerHTML += taskElementContainer;
+            break;
+        default:
+            todoTaskDiv.innerHTML += taskElementContainer;
+    }
+    });
+
+    
+    [todoTaskDiv, inPorgressTaskDiv, doneTaskDiv].forEach(eachTaskDivContainer => {
+        eachTaskDivContainer.addEventListener("click", (e) => {
+            const targetBtn = e.target as HTMLElement;
+
+            if (targetBtn.classList.contains("edit-btn")) {
+                editTask(targetBtn);
+            } else if (targetBtn.classList.contains("delete-btn")) {
+                deleteTask(targetBtn);
+            }
+        })
+    });
 };
 
-tasksContainer.addEventListener("click", (e) => {
-    const target = e.target as HTMLElement;
-
-    if (target.matches(".btn")) {
-        if (target.textContent === "Edit") {
-            editTask(target);
-        } else if (target.textContent === "Delete") {
-            deleteTask(target);
-        }
-    }
-});
 
 const editTask = (buttonEl: any) => {
     const dataArrIndex = taskData.findIndex(
@@ -97,7 +116,7 @@ const deleteTask = (buttonEL: any) => {
     const dataArrIndex = taskData.findIndex(
         (item: any) => item.id === buttonEL.parentElement.id
     );
-    
+
     buttonEL.parentElement.remove();
     taskData.splice(dataArrIndex, 1);
     localStorage.setItem("data", JSON.stringify(taskData));
