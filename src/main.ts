@@ -60,8 +60,8 @@ const updateTaskContainer = () => {
           <p><strong>Description:</strong> ${description}</p>
           <p><strong>Status:</strong> ${status}</p>
           <p><strong>Priority:</strong> ${priority}</p>
-          <button type="button" class="edit-btn">Edit</button>
-          <button type="button" class="delete-btn">Delete</button>
+          <button type="button" class="btn">Edit</button>
+          <button type="button" class="btn">Delete</button>
         </div>
       `;
 
@@ -80,20 +80,24 @@ const updateTaskContainer = () => {
     }
     });
 
-    
+    checkEditOrDeleteBtn();
+};
+
+const checkEditOrDeleteBtn = () => {
     [todoTaskDiv, inPorgressTaskDiv, doneTaskDiv].forEach(eachTaskDivContainer => {
         eachTaskDivContainer.addEventListener("click", (e) => {
             const targetBtn = e.target as HTMLElement;
 
-            if (targetBtn.classList.contains("edit-btn")) {
-                editTask(targetBtn);
-            } else if (targetBtn.classList.contains("delete-btn")) {
-                deleteTask(targetBtn);
+            if (targetBtn.matches(".btn")) {
+                if (targetBtn.textContent === "Edit") {
+                    editTask(targetBtn);
+                } else if (targetBtn.textContent === "Delete") {
+                    deleteTask(targetBtn);
+                }
             }
         })
     });
-};
-
+}
 
 const editTask = (buttonEl: any) => {
     const dataArrIndex = taskData.findIndex(
@@ -132,9 +136,15 @@ const resetTask = () => {
     taskForm.classList.toggle("hidden");
 };
 
+document.addEventListener("DOMContentLoaded", () => {
+    if (taskData.length > 0) {
+        updateTaskContainer();
+    }
+});
+
 taskForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    addOrUpdateTask();
+    addOrUpdateTask(); 
 });
 
 addTaskBtn.addEventListener("click", () => {
