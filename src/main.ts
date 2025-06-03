@@ -12,7 +12,7 @@ const inPorgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDi
 const doneTaskDiv = document.getElementById("done-tasks") as HTMLDivElement;
 
 
-const taskData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data") as string) : [];
+let taskData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data") as string) : [];
 
 let trackCurrentTask: any = {};
 
@@ -78,6 +78,10 @@ const updateTaskContainer = () => {
         default:
             todoTaskDiv.innerHTML += taskElementContainer;
     }
+
+    // allowDrop(taskData);
+    // drag(taskData);
+    // drop(taskData, status);
     });
 
     checkEditOrDeleteBtn();
@@ -135,6 +139,49 @@ const resetTask = () => {
     trackCurrentTask = {};
     taskForm.classList.toggle("hidden");
 };
+
+const allowDrop = (event: any) => {
+    event.preventDefault();
+}
+
+const drag = (event: any) => {
+    event.dataTransfer.setData("text/plain", event.target.id);
+}
+
+const drop = (event: any, columnId: any) => {
+    event.preventDefault();
+    console.log(columnId);
+    const data = event.dataTransfer.getData("text/plain");
+    const draggedElement = document.getElementById(data);
+    console.log(draggedElement);
+
+    if (draggedElement) {
+        const taskStatus = columnId;
+        updateTaskStatus(data, taskStatus);
+        event.target.querySelector('.task-container').
+            appendChild(draggedElement);
+    }
+}
+
+function updateTaskStatus(taskId: any, newStatus: any) {
+    console.log(newStatus)
+    taskData = taskData.map((task: any) => {
+        console.log(task)
+        console.log(taskId)
+        if (task.id === taskId) {
+            console.log("inside if")
+            return { ...task, status: newStatus };
+        }
+        return task;
+    });
+    updateLocalStorage();
+}
+
+function updateLocalStorage() {
+    console.log("task update")
+    localStorage.setItem
+        ('tasks', JSON.stringify(taskData));
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     if (taskData.length > 0) {
