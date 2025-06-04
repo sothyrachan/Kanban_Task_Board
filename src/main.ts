@@ -79,9 +79,9 @@ const updateTaskContainer = () => {
             todoTaskDiv.innerHTML += taskElementContainer;
     }
 
-    // allowDrop(taskData);
-    // drag(taskData);
-    // drop(taskData, status);
+    allowDrop(taskData);
+    drag(taskData);
+    drop(taskData, status);
     });
 
     checkEditOrDeleteBtn();
