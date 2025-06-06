@@ -7,42 +7,77 @@
     <title>Kanban Task Board</title>
     <link href="./output.css" rel="stylesheet" />
   </head>
+
   <body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
     <header class="bg-white shadow p-6 text-center">
       <h1 class="text-3xl font-bold mb-2">Kanban Task Board</h1>
-      <p class="text-gray-600">Organize your tasks by dragging them between columns</p>
+      <p class="text-gray-600">
+        Organize your tasks by dragging them between columns
+      </p>
     </header>
 
-    <main class="flex-1 container mx-auto p-6 space-y-8" aria-label="Kanban Board">
-      <section class="bg-white p-4 rounded shadow space-y-4" aria-label="Add New Task">
-        <button id="open-task-form-btn" type="button"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded">
+    <main
+      class="flex-1 container mx-auto p-6 space-y-8"
+      aria-label="Kanban Board"
+    >
+      <section
+        class="bg-white p-4 rounded shadow space-y-4"
+        aria-label="Add New Task"
+      >
+        <button
+          id="open-task-form-btn"
+          type="button"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded"
+        >
           + Add Task
         </button>
 
-        <form id="task-form" class="hidden bg-gray-50 p-4 rounded shadow space-y-4">
+        <form
+          id="task-form"
+          class="hidden bg-gray-50 p-4 rounded shadow space-y-4"
+        >
           <fieldset class="space-y-4">
             <div class="flex justify-between items-center">
               <legend class="text-xl font-semibold">Add New Task</legend>
-              <button type="button" id="close-form-btn" class="text-red-500 text-xl font-bold">×</button>
+              <button
+                type="button"
+                id="close-form-btn"
+                class="text-red-500 text-xl font-bold"
+              >
+                ×
+              </button>
             </div>
 
             <div>
               <label for="title" class="block font-medium">Title:</label>
-              <input type="text" id="title" name="title" required
-                class="w-full border border-gray-300 rounded p-2" />
+              <input
+                type="text"
+                id="title"
+                name="title"
+                required
+                class="w-full border border-gray-300 rounded p-2"
+              />
             </div>
 
             <div>
-              <label for="description" class="block font-medium">Description:</label>
-              <textarea id="description" name="description" rows="2"
-                class="w-full border border-gray-300 rounded p-2"></textarea>
+              <label for="description" class="block font-medium"
+                >Description:</label
+              >
+              <textarea
+                id="description"
+                name="description"
+                rows="2"
+                class="w-full border border-gray-300 rounded p-2"
+              ></textarea>
             </div>
 
             <div>
               <label for="status" class="block font-medium">Status:</label>
-              <select id="status" name="status"
-                class="w-full border border-gray-300 rounded p-2">
+              <select
+                id="status"
+                name="status"
+                class="w-full border border-gray-300 rounded p-2"
+              >
                 <option value="todo">To Do</option>
                 <option value="in-progress">In Progress</option>
                 <option value="done">Done</option>
@@ -51,16 +86,22 @@
 
             <div>
               <label for="priority" class="block font-medium">Priority:</label>
-              <select id="priority" name="priority"
-                class="w-full border border-gray-300 rounded p-2">
+              <select
+                id="priority"
+                name="priority"
+                class="w-full border border-gray-300 rounded p-2"
+              >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
             </div>
 
-            <button type="submit" id="add-new-task-btn"
-              class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded">
+            <button
+              type="submit"
+              id="add-new-task-btn"
+              class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded"
+            >
               Add Task
             </button>
           </fieldset>
@@ -69,9 +110,20 @@
         <dialog id="confirm-close-dialog" class="rounded-md p-4">
           <form method="dialog" class="space-y-4">
             <p class="text-lg">Discard unsaved changes?</p>
-            <div id="confirm-close-dialog-container" class="flex justify-end gap-4">
-              <button id="cancel-dialog-btn" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Cancel</button>
-              <button id="discard-dialog-btn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+            <div
+              id="confirm-close-dialog-container"
+              class="flex justify-end gap-4"
+            >
+              <button
+                id="cancel-dialog-btn"
+                class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                id="discard-dialog-btn"
+                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+              >
                 Discard
               </button>
             </div>
@@ -79,31 +131,54 @@
         </dialog>
       </section>
 
-      <section class="kanban-columns grid grid-cols-1 md:grid-cols-3 gap-6" aria-label="Task Columns">
-        <div class="column bg-white rounded shadow p-4 space-y-4" data-status="todo" 
-          ondrop="drop(event, 'todo')"
-          ondragover="allowDrop(event)">
+      <section
+        class="kanban-columns grid grid-cols-1 md:grid-cols-3 gap-6"
+        aria-label="Task Columns"
+      >
+        <!-- Todo Column -->
+        <div
+          class="column bg-white rounded shadow p-4 space-y-4"
+          data-status="todo"
+        >
           <h2 class="text-xl font-semibold border-b pb-2">To Do</h2>
-          <div class="task-list space-y-2" id="todo-tasks"></div>
+          <div
+            class="task-list space-y-2"
+            id="todo-tasks"
+            data-droppable="true"
+          ></div>
         </div>
 
-        <div class="column bg-white rounded shadow p-4 space-y-4" data-status="in-progress"
-          ondrop="drop(event, 'in-progress')"
-          ondragover="allowDrop(event)">
+        <!-- In Progress Column -->
+        <div
+          class="column bg-white rounded shadow p-4 space-y-4"
+          data-status="in-progress"
+        >
           <h2 class="text-xl font-semibold border-b pb-2">In Progress</h2>
-          <div class="task-list space-y-2" id="in-progress-tasks"></div>
+          <div
+            class="task-list space-y-2"
+            id="in-progress-tasks"
+            data-droppable="true"
+          ></div>
         </div>
 
-        <div class="column bg-white rounded shadow p-4 space-y-4" data-status="done"
-          ondrop="drop(event, 'done')"
-          ondragover="allowDrop(event)">
+        <!-- Done Column -->
+        <div
+          class="column bg-white rounded shadow p-4 space-y-4"
+          data-status="done"
+        >
           <h2 class="text-xl font-semibold border-b pb-2">Done</h2>
-          <div class="task-list space-y-2" id="done-tasks"></div>
+          <div
+            class="task-list space-y-2"
+            id="done-tasks"
+            data-droppable="true"
+          ></div>
         </div>
       </section>
     </main>
 
-    <footer class="bg-white text-center text-sm text-gray-500 py-4 shadow-inner">
+    <footer
+      class="bg-white text-center text-sm text-gray-500 py-4 shadow-inner"
+    >
       <p>&copy; 2025 Sothyra Chan. All rights reserved.</p>
     </footer>
 
