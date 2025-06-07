@@ -2,38 +2,47 @@ import './output.css';
 
 const addTaskBtn = document.getElementById("open-task-form-btn") as HTMLButtonElement;
 const taskForm = document.getElementById("task-form") as HTMLFormElement;
+const closeAddTaskFormBtn = document.getElementById("close-form-btn") as HTMLButtonElement;
 const titleInput = document.getElementById("title") as HTMLInputElement;
 const descField = document.getElementById("description") as HTMLTextAreaElement;
 const statusOpt = document.getElementById("status") as HTMLSelectElement;
 const priorityOpt = document.getElementById("priority") as HTMLSelectElement;
 const addedOrUpdatedTaskBtn = document.getElementById("add-new-task-btn") as HTMLButtonElement;
 const todoTaskDiv = document.getElementById("todo-tasks") as HTMLDivElement;
-const inPorgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
+const inProgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
 const doneTaskDiv = document.getElementById("done-tasks") as HTMLDivElement;
 
 
-let taskData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data") as string) : [];
+let taskData: Task[] = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data") as string) : [];
 
-let trackCurrentTask: any = {};
+let trackCurrentTask: Task | null = null;
 
 const removeSpecialChars = (value: string) => {
     return value.trim().replace(/[^A-Za-z0-9\-\s]/g, "");
 };
 
+interface Task {
+    id: string;
+    title: string;
+    description: string;
+    status: 'todo' | 'in-progress' | 'done';
+    priority: 'low' | 'medium' | 'high';
+}
+
 const addOrUpdateTask = () => {
     if (!titleInput.value.trim()) return alert("Please input the task title!");
 
-    const dataArrIndex = taskData.findIndex((item: any) => item.id === trackCurrentTask.id)
+    const dataArrIndex = taskData.findIndex((item: any) => item.id === trackCurrentTask?.id)
 
-    const taskObj: any = {
+    const taskObj: Task = {
         id: `${removeSpecialChars(titleInput.value)
             .toLowerCase()
             .split(" ")
             .join("-")}-${Date.now()}`,
         title: removeSpecialChars(titleInput.value),
         description: removeSpecialChars(descField.value),
-        status: statusOpt.value,
-        priority: priorityOpt.value,
+        status: statusOpt.value as 'todo' | 'in-progress' | 'done',
+        priority: priorityOpt.value as 'low' | 'medium' | 'high',
     };
 
     if (dataArrIndex === -1) {
@@ -49,48 +58,84 @@ const addOrUpdateTask = () => {
 
 const updateTaskContainer = () => {
     todoTaskDiv.innerHTML = "";
-    inPorgressTaskDiv.innerHTML = "";
+    inProgressTaskDiv.innerHTML = "";
     doneTaskDiv.innerHTML = "";
 
     // loop through the taskData array and add the tasks to the DOM
     taskData.forEach(({ id, title, description, status, priority }: any) => {
-        const taskElementContainer = `
-        <div class="task" id="${id}">
+        const taskEl = document.createElement("div");
+        taskEl.className = "task";
+        taskEl.id = id;
+        taskEl.draggable = true;
+
+        taskEl.innerHTML = `
           <p><strong>Title:</strong> ${title}</p>
           <p><strong>Description:</strong> ${description}</p>
           <p><strong>Status:</strong> ${status}</p>
           <p><strong>Priority:</strong> ${priority}</p>
           <button type="button" class="btn">Edit</button>
           <button type="button" class="btn">Delete</button>
-        </div>
       `;
 
-    switch (status) {
-        case "todo":
-            todoTaskDiv.innerHTML += taskElementContainer;
-            break;
-        case "in-progress":
-            inPorgressTaskDiv.innerHTML += taskElementContainer;
-            break;
-        case "done":
-            doneTaskDiv.innerHTML += taskElementContainer;
-            break;
-        default:
-            todoTaskDiv.innerHTML += taskElementContainer;
-    }
+        taskEl.addEventListener("dragstart", (e) => {
+            e.dataTransfer?.setData("text/plain", taskEl.id)
+        });
 
-    allowDrop(taskData);
-    drag(taskData);
-    drop(taskData, status);
+        switch (status) {
+            case "todo":
+                todoTaskDiv.appendChild(taskEl);
+                break;
+            case "in-progress":
+                inProgressTaskDiv.appendChild(taskEl);
+                break;
+            case "done":
+                doneTaskDiv.appendChild(taskEl);
+                break;
+            default:
+                todoTaskDiv.appendChild(taskEl);
+        }
     });
 
     checkEditOrDeleteBtn();
 };
 
+const initializeDragAndDrop = () => {
+    [todoTaskDiv, inProgressTaskDiv, doneTaskDiv].forEach((container) => {
+        container.addEventListener("dragstart", (e: DragEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.classList.contains("task")) {
+                e.dataTransfer?.setData("text/plain", target.id);
+            }
+        });
+
+        // Allow drop
+        container.addEventListener("dragover", (e: DragEvent) => {
+            e.preventDefault();
+        });
+
+        // Handle drop
+        container.addEventListener("drop", (e: DragEvent) => {
+            e.preventDefault();
+            
+            const taskId = e.dataTransfer?.getData("text/plain");
+            
+            // container is the div on which drop event is fired, so get status from it
+            const targetColumn = container.id === 'todo-tasks' ? 'todo' :
+                                 container.id === 'in-progress-tasks' ? 'in-progress' :
+                                 container.id === 'done-tasks' ? 'done' : null;
+
+            if (taskId && targetColumn) {
+                updateTaskStatus(taskId, targetColumn);
+                updateTaskContainer(); // Refresh all containers
+            }
+        })
+    })
+}
+
 const checkEditOrDeleteBtn = () => {
-    [todoTaskDiv, inPorgressTaskDiv, doneTaskDiv].forEach(eachTaskDivContainer => {
+    [todoTaskDiv, inProgressTaskDiv, doneTaskDiv].forEach(eachTaskDivContainer => {
         eachTaskDivContainer.addEventListener("click", (e) => {
-            const targetBtn = e.target as HTMLElement;
+            const targetBtn = e.target as HTMLButtonElement;
 
             if (targetBtn.matches(".btn")) {
                 if (targetBtn.textContent === "Edit") {
@@ -103,9 +148,9 @@ const checkEditOrDeleteBtn = () => {
     });
 }
 
-const editTask = (buttonEl: any) => {
+const editTask = (buttonEl: HTMLButtonElement) => {
     const dataArrIndex = taskData.findIndex(
-        (item: any) => item.id === buttonEl.parentElement.id
+        (item: any) => item.id === buttonEl.parentElement?.id
     );
 
     trackCurrentTask = taskData[dataArrIndex];
@@ -120,12 +165,12 @@ const editTask = (buttonEl: any) => {
     taskForm.classList.toggle("hidden");
 };
 
-const deleteTask = (buttonEL: any) => {
+const deleteTask = (buttonEL: HTMLButtonElement) => {
     const dataArrIndex = taskData.findIndex(
-        (item: any) => item.id === buttonEL.parentElement.id
+        (item: any) => item.id === buttonEL.parentElement?.id
     );
 
-    buttonEL.parentElement.remove();
+    buttonEL.parentElement?.remove();
     taskData.splice(dataArrIndex, 1);
     localStorage.setItem("data", JSON.stringify(taskData));
 };
@@ -136,57 +181,27 @@ const resetTask = () => {
     descField.value = "";
     statusOpt.value = "";
     priorityOpt.value = "";
-    trackCurrentTask = {};
+    trackCurrentTask = null;
     taskForm.classList.toggle("hidden");
 };
 
-const allowDrop = (event: any) => {
-    event.preventDefault();
-}
-
-const drag = (event: any) => {
-    event.dataTransfer.setData("text/plain", event.target.id);
-}
-
-const drop = (event: any, columnId: any) => {
-    event.preventDefault();
-    console.log(columnId);
-    const data = event.dataTransfer.getData("text/plain");
-    const draggedElement = document.getElementById(data);
-    console.log(draggedElement);
-
-    if (draggedElement) {
-        const taskStatus = columnId;
-        updateTaskStatus(data, taskStatus);
-        event.target.querySelector('.task-container').
-            appendChild(draggedElement);
+function updateTaskStatus(taskId: string, newStatus: string) {
+    if (!['todo', 'in-progress', 'done'].includes(newStatus)) {
+        console.error('Invalid status:', newStatus);
+        return;
     }
-}
-
-function updateTaskStatus(taskId: any, newStatus: any) {
-    console.log(newStatus)
-    taskData = taskData.map((task: any) => {
-        console.log(task)
-        console.log(taskId)
-        if (task.id === taskId) {
-            console.log("inside if")
-            return { ...task, status: newStatus };
-        }
-        return task;
-    });
-    updateLocalStorage();
-}
-
-function updateLocalStorage() {
-    console.log("task update")
-    localStorage.setItem
-        ('tasks', JSON.stringify(taskData));
+    const taskIndex = taskData.findIndex((task: any) => task.id === taskId);
+    if (taskIndex !== -1) {
+        taskData[taskIndex].status = newStatus as 'todo' | 'in-progress' | 'done';
+        localStorage.setItem("data", JSON.stringify(taskData));
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     if (taskData.length > 0) {
         updateTaskContainer();
     }
+    initializeDragAndDrop();
 });
 
 taskForm.addEventListener("submit", (e) => {
@@ -196,4 +211,8 @@ taskForm.addEventListener("submit", (e) => {
 
 addTaskBtn.addEventListener("click", () => {
     taskForm.classList.toggle("hidden");
+});
+
+closeAddTaskFormBtn.addEventListener("click", () => {
+    taskForm.classList.add("hidden");
 });
