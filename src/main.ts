@@ -78,7 +78,10 @@ const updateTaskContainer = () => {
       `;
 
         taskEl.addEventListener("dragstart", (e) => {
-            e.dataTransfer?.setData("text/plain", taskEl.id)
+            if (e.dataTransfer) {
+                e.dataTransfer.setData("text/plain", taskEl.id);
+                e.dataTransfer.effectAllowed = "move";
+            }
         });
 
         switch (status) {
@@ -101,13 +104,6 @@ const updateTaskContainer = () => {
 
 const initializeDragAndDrop = () => {
     [todoTaskDiv, inProgressTaskDiv, doneTaskDiv].forEach((container) => {
-        container.addEventListener("dragstart", (e: DragEvent) => {
-            const target = e.target as HTMLElement;
-            if (target.classList.contains("task")) {
-                e.dataTransfer?.setData("text/plain", target.id);
-            }
-        });
-
         // Allow drop
         container.addEventListener("dragover", (e: DragEvent) => {
             e.preventDefault();
