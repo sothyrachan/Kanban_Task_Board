@@ -31,6 +31,8 @@ interface Task {
 
 const addOrUpdateTask = () => {
     if (!titleInput.value.trim()) return alert("Please input the task title!");
+    if (!statusOpt.value) return alert("Please select the status option!");
+    if (!priorityOpt.value) return alert("Please select the priority option!");
 
     const dataArrIndex = taskData.findIndex((item: any) => item.id === trackCurrentTask?.id)
 
@@ -67,6 +69,7 @@ const updateTaskContainer = () => {
         taskEl.className = "task";
         taskEl.id = id;
         taskEl.draggable = true;
+        taskEl.setAttribute("data-status", status);
 
         taskEl.innerHTML = `
           <p><strong>Title:</strong> ${title}</p>
@@ -107,23 +110,29 @@ const initializeDragAndDrop = () => {
         // Allow drop
         container.addEventListener("dragover", (e: DragEvent) => {
             e.preventDefault();
+            e.stopPropagation();
+            container.classList.add("drag-over");
+        });
+
+        container.addEventListener("dragleave", (e: DragEvent) => {
+            e.preventDefault();
+            container.classList.remove("drag-over")
         });
 
         // Handle drop
         container.addEventListener("drop", (e: DragEvent) => {
             e.preventDefault();
+            e.stopPropagation();
+            container.classList.remove("drag-over");
             
             const taskId = e.dataTransfer?.getData("text/plain");
+            const target = e.currentTarget as HTMLElement;
             
-            // container is the div on which drop event is fired, so get status from it
-            const targetColumn = container.id === 'todo-tasks' ? 'todo' :
-                                 container.id === 'in-progress-tasks' ? 'in-progress' :
-                                 container.id === 'done-tasks' ? 'done' : null;
+            if (!taskId || !target) return;
 
-            if (taskId && targetColumn) {
-                updateTaskStatus(taskId, targetColumn);
-                updateTaskContainer(); // Refresh all containers
-            }
+            const newStatus = target.id.replace('-tasks', '') as 'todo' | 'in-progress' | 'done';
+            updateTaskStatus(taskId, newStatus);
+            updateTaskContainer();
         })
     })
 }

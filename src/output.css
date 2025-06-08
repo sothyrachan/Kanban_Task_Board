@@ -421,6 +421,32 @@
 .hidden {
   display: none;
 }
+.drag-over {
+  border: 2px dashed #4a5568;
+  background-color: rgba(74, 85, 104, 0.1);
+}
+.task {
+  cursor: grab;
+}
+.task:active {
+  cursor: grabbing;
+}
+.task {
+  cursor: grab;
+  user-select: none;
+  background: white;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.task:active {
+  cursor: grabbing;
+}
+.drag-over {
+  border: 2px dashed #4a5568;
+  background-color: rgba(74, 85, 104, 0.1);
+}
 @property --tw-space-y-reverse {
   syntax: "*";
   inherits: false;
