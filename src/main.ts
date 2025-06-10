@@ -103,6 +103,7 @@ const updateTaskContainer = () => {
     });
 
     checkEditOrDeleteBtn();
+    //initializeDragAndDrop();
 };
 
 const initializeDragAndDrop = () => {
@@ -203,9 +204,7 @@ function updateTaskStatus(taskId: string, newStatus: string) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (taskData.length > 0) {
-        updateTaskContainer();
-    }
+    updateTaskContainer();
     initializeDragAndDrop();
 });
 

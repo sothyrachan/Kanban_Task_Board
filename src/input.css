@@ -35,3 +35,15 @@
     border: 2px dashed #4a5568;
     background-color: rgba(74, 85, 104, 0.1);
 }
+
+.task-list {
+    min-height: 200px;  /* Add minimum height for empty lists */
+    padding: 1rem;
+    border: 2px solid transparent; /* For drop target visibility */
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    min-height: 300px; /* Ensure column is always visible */
+}

@@ -131,52 +131,38 @@
         </dialog>
       </section>
 
-      <section
-        class="kanban-columns grid grid-cols-1 md:grid-cols-3 gap-6"
-        aria-label="Task Columns"
-      >
-        <!-- Todo Column -->
-        <div
-          class="column bg-white rounded shadow p-4 space-y-4"
-          data-status="todo"
-        >
-          <h2 class="text-xl font-semibold border-b pb-2">To Do</h2>
-          <div
-            class="task-list space-y-2"
-            id="todo-tasks"
-            data-status="todo"
-            data-droppable="true"
-          ></div>
+<!-- Task Columns Section -->
+<section class="kanban-columns grid grid-cols-1 md:grid-cols-3 gap-6" aria-label="Task Columns">
+    <!-- Todo Column -->
+    <div class="column bg-white rounded shadow p-4 space-y-4">
+        <h2 class="text-xl font-semibold border-b pb-2">To Do</h2>
+        <div 
+            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200" 
+            id="todo-tasks" 
+            data-status="todo">
         </div>
+    </div>
 
-        <!-- In Progress Column -->
-        <div
-          class="column bg-white rounded shadow p-4 space-y-4"
-          data-status="in-progress"
-        >
-          <h2 class="text-xl font-semibold border-b pb-2">In Progress</h2>
-          <div
-            class="task-list space-y-2"
-            id="in-progress-tasks"
-            data-status="in-progress"
-            data-droppable="true"
-          ></div>
+    <!-- In Progress Column -->
+    <div class="column bg-white rounded shadow p-4 space-y-4">
+        <h2 class="text-xl font-semibold border-b pb-2">In Progress</h2>
+        <div 
+            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200" 
+            id="in-progress-tasks" 
+            data-status="in-progress">
         </div>
+    </div>
 
-        <!-- Done Column -->
-        <div
-          class="column bg-white rounded shadow p-4 space-y-4"
-          data-status="done"
-        >
-          <h2 class="text-xl font-semibold border-b pb-2">Done</h2>
-          <div
-            class="task-list space-y-2"
-            id="done-tasks"
-            data-status="done"
-            data-droppable="true"
-          ></div>
+    <!-- Done Column -->
+    <div class="column bg-white rounded shadow p-4 space-y-4">
+        <h2 class="text-xl font-semibold border-b pb-2">Done</h2>
+        <div 
+            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200" 
+            id="done-tasks" 
+            data-status="done">
         </div>
-      </section>
+    </div>
+</section>
     </main>
 
     <footer
