@@ -1,84 +1,96 @@
 import './output.css';
 
-const addTaskBtn = document.getElementById("open-task-form-btn") as HTMLButtonElement;
-const taskForm = document.getElementById("task-form") as HTMLFormElement;
-const closeAddTaskFormBtn = document.getElementById("close-form-btn") as HTMLButtonElement;
-const titleInput = document.getElementById("title") as HTMLInputElement;
-const descField = document.getElementById("description") as HTMLTextAreaElement;
-const statusOpt = document.getElementById("status") as HTMLSelectElement;
-const priorityOpt = document.getElementById("priority") as HTMLSelectElement;
-const addedOrUpdatedTaskBtn = document.getElementById("add-new-task-btn") as HTMLButtonElement;
-const todoTaskDiv = document.getElementById("todo-tasks") as HTMLDivElement;
-const inProgressTaskDiv = document.getElementById("in-progress-tasks") as HTMLDivElement;
-const doneTaskDiv = document.getElementById("done-tasks") as HTMLDivElement;
+type Status = "todo" | "inProgress" | "done";
 
-
-let taskData: Task[] = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data") as string) : [];
-
-let trackCurrentTask: Task | null = null;
-
-const removeSpecialChars = (value: string) => {
-    return value.trim().replace(/[^A-Za-z0-9\-\s]/g, "");
-};
+type Priority = "low" | "medium" | "high";
 
 interface Task {
     id: string;
     title: string;
     description: string;
-    status: 'todo' | 'in-progress' | 'done';
-    priority: 'low' | 'medium' | 'high';
+    status: Status;
+    priority: Priority;
 }
 
+const dom = {
+    buttons: {
+        openForm: document.getElementById("open-task-form-btn") as HTMLButtonElement,
+        closeForm: document.getElementById("close-form-btn") as HTMLButtonElement,
+        submit:  document.getElementById("add-new-task-btn") as HTMLButtonElement,
+    },
+    form: document.getElementById("task-form") as HTMLFormElement,
+    inputs: {
+        title: document.getElementById("title") as HTMLInputElement,
+        description: document.getElementById("description") as HTMLTextAreaElement,
+        status: document.getElementById("status") as HTMLSelectElement,
+        priority:  document.getElementById("priority") as HTMLSelectElement,
+    },
+    containers: {
+        todo: document.getElementById("todo-tasks") as HTMLDivElement,
+        inProgress: document.getElementById("in-progress-tasks") as HTMLDivElement,
+        done: document.getElementById("done-tasks") as HTMLDivElement,
+    },
+};
+ 
+let taskData: Task[] = JSON.parse(localStorage.getItem("data") || "[]");
+let trackCurrentTask: Task | null = null;
+
+
+const removeSpecialChars = (value: string) => 
+    value.trim().replace(/[^A-Za-z0-9\-\s]/g, "");
+
+const generateTaskId = (title: string) => 
+    `${removeSpecialChars(title).toLowerCase().split(" ").join("-")}-${Date.now()}`;
+
+const saveTasksToStorage = () => 
+    localStorage.setItem("data", JSON.stringify(taskData));
+
+const getTaskElementHTML = (task: Task) => `
+    <p><strong>Title:</strong> ${task.title}</p>
+    <p><strong>Description:</strong> ${task.description}</p>
+    <p><strong>Status:</strong> ${task.status}</p>
+    <p><strong>Priority:</strong> ${task.priority}</p>
+    <button type="button" class="btn">Edit</button>
+    <button type="button" class="btn">Delete</button>
+`;
+
 const addOrUpdateTask = () => {
-    if (!titleInput.value.trim()) return alert("Please input the task title!");
-    if (!statusOpt.value) return alert("Please select the status option!");
-    if (!priorityOpt.value) return alert("Please select the priority option!");
+    const { title, description, status, priority } = dom.inputs;
 
-    const dataArrIndex = taskData.findIndex((item: any) => item.id === trackCurrentTask?.id)
+    if (!title.value.trim()) return alert("Please input the task title!");
+    if (!status.value) return alert("Please select the status option!");
+    if (!priority.value) return alert("Please select the priority option!");
 
-    const taskObj: Task = {
-        id: `${removeSpecialChars(titleInput.value)
-            .toLowerCase()
-            .split(" ")
-            .join("-")}-${Date.now()}`,
-        title: removeSpecialChars(titleInput.value),
-        description: removeSpecialChars(descField.value),
-        status: statusOpt.value as 'todo' | 'in-progress' | 'done',
-        priority: priorityOpt.value as 'low' | 'medium' | 'high',
-    };
-
-    if (dataArrIndex === -1) {
-        taskData.unshift(taskObj);
-    } else {
-        taskData[dataArrIndex] = taskObj;
+    const dataArrIndex = taskData.findIndex(task => task.id === trackCurrentTask?.id)
+    const newTask: Task = {
+        id: generateTaskId(title.value),
+        title: removeSpecialChars(title.value),
+        description: removeSpecialChars(description.value),
+        status: status.value as Status,
+        priority: priority.value as Priority,
     }
 
-    localStorage.setItem("data", JSON.stringify(taskData));
+    if (dataArrIndex === -1) {
+        taskData.unshift(newTask);
+    } else {
+        taskData[dataArrIndex] = newTask;
+    }
+
+    saveTasksToStorage();
     updateTaskContainer();
     resetTask();
 };
 
 const updateTaskContainer = () => {
-    todoTaskDiv.innerHTML = "";
-    inProgressTaskDiv.innerHTML = "";
-    doneTaskDiv.innerHTML = "";
+    Object.values(dom.containers).forEach(container => (container.innerHTML = ""));
 
-    // loop through the taskData array and add the tasks to the DOM
-    taskData.forEach(({ id, title, description, status, priority }: any) => {
+    taskData.forEach(task => {
         const taskEl = document.createElement("div");
         taskEl.className = "task";
-        taskEl.id = id;
+        taskEl.id = task.id;
         taskEl.draggable = true;
-        taskEl.setAttribute("data-status", status);
-
-        taskEl.innerHTML = `
-          <p><strong>Title:</strong> ${title}</p>
-          <p><strong>Description:</strong> ${description}</p>
-          <p><strong>Status:</strong> ${status}</p>
-          <p><strong>Priority:</strong> ${priority}</p>
-          <button type="button" class="btn">Edit</button>
-          <button type="button" class="btn">Delete</button>
-      `;
+        taskEl.setAttribute("data-status", task.status);
+        taskEl.innerHTML = getTaskElementHTML(task);
 
         taskEl.addEventListener("dragstart", (e) => {
             if (e.dataTransfer) {
@@ -87,27 +99,84 @@ const updateTaskContainer = () => {
             }
         });
 
-        switch (status) {
+        switch (task.status) {
             case "todo":
-                todoTaskDiv.appendChild(taskEl);
+                dom.containers.todo.appendChild(taskEl);
                 break;
-            case "in-progress":
-                inProgressTaskDiv.appendChild(taskEl);
+            case "inProgress":
+                dom.containers.inProgress.appendChild(taskEl);
                 break;
             case "done":
-                doneTaskDiv.appendChild(taskEl);
+                dom.containers.done.appendChild(taskEl);
                 break;
-            default:
-                todoTaskDiv.appendChild(taskEl);
         }
     });
 
-    checkEditOrDeleteBtn();
-    //initializeDragAndDrop();
+    bindTaskCardActions();
 };
 
+const bindTaskCardActions = () => {
+    Object.values(dom.containers).forEach(container => {
+        container.addEventListener("click", (e) => {
+            const target = e.target as HTMLButtonElement;
+            const taskEl = target.closest(".task") as HTMLElement;
+
+            if (!target.matches(".btn") || !taskEl) return;
+
+            if (target.textContent === "Edit") {
+                editTask(taskEl.id);
+            } else if (target.textContent === "Delete") {
+                deleteTask(taskEl.id);
+            }
+        });
+    });
+}
+
+const editTask = (taskId: string) => {
+    const task = taskData.find(task => task.id === taskId);
+    if (!task) return;
+
+    trackCurrentTask = task;
+
+    dom.inputs.title.value = task.title;
+    dom.inputs.description.value = task.description;
+    dom.inputs.status.value = task.status;
+    dom.inputs.priority.value = task.priority;
+
+    dom.buttons.submit.innerText = "Update Task";
+    dom.form.classList.toggle("hidden");
+};
+
+const deleteTask = (taskId: string) => {
+    taskData = taskData.filter(task => task.id !== taskId);
+    saveTasksToStorage();
+    updateTaskContainer();
+};
+
+const resetTask = () => {
+    dom.buttons.submit.innerText = "Add Task";
+    dom.inputs.title.value = "";
+    dom.inputs.description.value = "";
+    dom.inputs.status.value = "";
+    dom.inputs.priority.value = "";
+    trackCurrentTask = null;
+    dom.form.classList.toggle("hidden");
+};
+
+const updateTaskStatus = (taskId: string, newStatus: string) => {
+    const validStatus: Status[] = ["todo", "inProgress", "done"];
+    
+    if (!validStatus.includes(newStatus as Status)) return;
+
+    const taskIndex = taskData.find(task=> task.id === taskId);
+    if (taskIndex) {
+        taskIndex.status = newStatus as Status;
+        saveTasksToStorage();
+    }
+}
+
 const initializeDragAndDrop = () => {
-    [todoTaskDiv, inProgressTaskDiv, doneTaskDiv].forEach((container) => {
+    Object.values(dom.containers).forEach((container) => {
         // Allow drop
         container.addEventListener("dragover", (e: DragEvent) => {
             e.preventDefault();
@@ -115,108 +184,50 @@ const initializeDragAndDrop = () => {
             container.classList.add("drag-over");
         });
 
-        container.addEventListener("dragleave", (e: DragEvent) => {
-            e.preventDefault();
-            container.classList.remove("drag-over")
+        container.addEventListener("dragleave", () => {
+            container.classList.remove("drag-over");
         });
+
+        // container.addEventListener("dragleave", (e: DragEvent) => {
+        //     e.preventDefault();
+        //     container.classList.remove("drag-over")
+        // });
 
         // Handle drop
         container.addEventListener("drop", (e: DragEvent) => {
             e.preventDefault();
-            e.stopPropagation();
             container.classList.remove("drag-over");
             
             const taskId = e.dataTransfer?.getData("text/plain");
-            const target = e.currentTarget as HTMLElement;
-            
-            if (!taskId || !target) return;
+            const newStatus = container.id.replace("-tasks", '') as Status;
 
-            const newStatus = target.id.replace('-tasks', '') as 'todo' | 'in-progress' | 'done';
-            updateTaskStatus(taskId, newStatus);
-            updateTaskContainer();
-        })
-    })
-}
-
-const checkEditOrDeleteBtn = () => {
-    [todoTaskDiv, inProgressTaskDiv, doneTaskDiv].forEach(eachTaskDivContainer => {
-        eachTaskDivContainer.addEventListener("click", (e) => {
-            const targetBtn = e.target as HTMLButtonElement;
-
-            if (targetBtn.matches(".btn")) {
-                if (targetBtn.textContent === "Edit") {
-                    editTask(targetBtn);
-                } else if (targetBtn.textContent === "Delete") {
-                    deleteTask(targetBtn);
-                }
+            if (taskId) {
+                updateTaskStatus(taskId, newStatus);
+                updateTaskContainer();
             }
-        })
+        });
     });
-}
-
-const editTask = (buttonEl: HTMLButtonElement) => {
-    const dataArrIndex = taskData.findIndex(
-        (item: any) => item.id === buttonEl.parentElement?.id
-    );
-
-    trackCurrentTask = taskData[dataArrIndex];
-
-    titleInput.value = trackCurrentTask.title;
-    descField.value = trackCurrentTask.description;
-    statusOpt.value = trackCurrentTask.status;
-    priorityOpt.value = trackCurrentTask.priority;
-
-    addedOrUpdatedTaskBtn.innerText = "Update Task";
-
-    taskForm.classList.toggle("hidden");
 };
 
-const deleteTask = (buttonEL: HTMLButtonElement) => {
-    const dataArrIndex = taskData.findIndex(
-        (item: any) => item.id === buttonEL.parentElement?.id
-    );
+const bindUIEvents = () => {
+    dom.form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        addOrUpdateTask(); 
+    });
 
-    buttonEL.parentElement?.remove();
-    taskData.splice(dataArrIndex, 1);
-    localStorage.setItem("data", JSON.stringify(taskData));
+    dom.buttons.openForm.addEventListener("click", () => {
+        dom.form.classList.toggle("hidden");
+    });
+
+    dom.buttons.closeForm.addEventListener("click", () => {
+        dom.form.classList.add("hidden");
+    });
 };
 
-const resetTask = () => {
-    addedOrUpdatedTaskBtn.innerText = "Add Task";
-    titleInput.value = "";
-    descField.value = "";
-    statusOpt.value = "";
-    priorityOpt.value = "";
-    trackCurrentTask = null;
-    taskForm.classList.toggle("hidden");
-};
-
-function updateTaskStatus(taskId: string, newStatus: string) {
-    if (!['todo', 'in-progress', 'done'].includes(newStatus)) {
-        console.error('Invalid status:', newStatus);
-        return;
-    }
-    const taskIndex = taskData.findIndex((task: any) => task.id === taskId);
-    if (taskIndex !== -1) {
-        taskData[taskIndex].status = newStatus as 'todo' | 'in-progress' | 'done';
-        localStorage.setItem("data", JSON.stringify(taskData));
-    }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
+const init = () => {
     updateTaskContainer();
     initializeDragAndDrop();
-});
+    bindUIEvents();
+};
 
-taskForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    addOrUpdateTask(); 
-});
-
-addTaskBtn.addEventListener("click", () => {
-    taskForm.classList.toggle("hidden");
-});
-
-closeAddTaskFormBtn.addEventListener("click", () => {
-    taskForm.classList.add("hidden");
-});
+document.addEventListener("DOMContentLoaded", init);
