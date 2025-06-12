@@ -1,8 +1,16 @@
-import './output.css';
+import "./output.css";
 
-type Status = "todo" | "inProgress" | "done";
+enum Status {
+    Todo = "todo",
+    InProgress = "in-progress",
+    Done = "done",
+}
 
-type Priority = "low" | "medium" | "high";
+enum Priority {
+    Low = "low",
+    Medium = "medium",
+    High = "high",
+}
 
 interface Task {
     id: string;
@@ -16,14 +24,21 @@ const dom = {
     buttons: {
         openForm: document.getElementById("open-task-form-btn") as HTMLButtonElement,
         closeForm: document.getElementById("close-form-btn") as HTMLButtonElement,
-        submit:  document.getElementById("add-new-task-btn") as HTMLButtonElement,
+        submit: document.getElementById("add-new-task-btn") as HTMLButtonElement,
+        cancelDialog: document.getElementById("cancel-dialog-btn") as HTMLButtonElement,
+        discardDialog: document.getElementById("discard-dialog-btn") as HTMLButtonElement,
     },
     form: document.getElementById("task-form") as HTMLFormElement,
     inputs: {
         title: document.getElementById("title") as HTMLInputElement,
         description: document.getElementById("description") as HTMLTextAreaElement,
         status: document.getElementById("status") as HTMLSelectElement,
-        priority:  document.getElementById("priority") as HTMLSelectElement,
+        priority: document.getElementById("priority") as HTMLSelectElement,
+    },
+    dialogMessage: {
+        confirmCloseDialog : document.getElementById("confirm-close-dialog") as HTMLDialogElement,
+        errorInputMsgBox: document.getElementById("error-dialog") as HTMLDialogElement,
+        errorInputMsg: document.getElementById("error-dialog-message") as HTMLElement,
     },
     containers: {
         todo: document.getElementById("todo-tasks") as HTMLDivElement,
@@ -31,44 +46,50 @@ const dom = {
         done: document.getElementById("done-tasks") as HTMLDivElement,
     },
 };
- 
+
 let taskData: Task[] = JSON.parse(localStorage.getItem("data") || "[]");
 let trackCurrentTask: Task | null = null;
 
-
-const removeSpecialChars = (value: string) => 
+const removeSpecialChars = (value: string) =>
     value.trim().replace(/[^A-Za-z0-9\-\s]/g, "");
 
-const generateTaskId = (title: string) => 
-    `${removeSpecialChars(title).toLowerCase().split(" ").join("-")}-${Date.now()}`;
+const generateTaskId = (title: string) =>
+    `${removeSpecialChars(title)
+        .toLowerCase()
+        .split(" ")
+        .join("-")}-${Date.now()}`;
 
-const saveTasksToStorage = () => 
+const saveTasksToStorage = () =>
     localStorage.setItem("data", JSON.stringify(taskData));
 
 const getTaskElementHTML = (task: Task) => `
-    <p><strong>Title:</strong> ${task.title}</p>
-    <p><strong>Description:</strong> ${task.description}</p>
-    <p><strong>Status:</strong> ${task.status}</p>
-    <p><strong>Priority:</strong> ${task.priority}</p>
-    <button type="button" class="btn">Edit</button>
-    <button type="button" class="btn">Delete</button>
+    <p class="text-sm"><strong>Title:</strong> ${task.title}</p>
+    <p class="text-sm"><strong>Description:</strong> ${task.description}</p>
+    <p class="text-sm"><strong>Status:</strong> ${task.status}</p>
+    <p class="text-sm"><strong>Priority:</strong> ${task.priority}</p>
+    <div class="mt-2 flex gap-2">
+      <button type="button" class="btn btn-edit">Edit</button>
+      <button type="button" class="btn btn-delete">Delete</button>
+    </div>
 `;
 
 const addOrUpdateTask = () => {
     const { title, description, status, priority } = dom.inputs;
 
-    if (!title.value.trim()) return alert("Please input the task title!");
-    if (!status.value) return alert("Please select the status option!");
-    if (!priority.value) return alert("Please select the priority option!");
+    if (!title.value.trim()) return showErrorDialog("Please input the Task Title!");
+    if (!status.value) return showErrorDialog("Please select the Status Option!");
+    if (!priority.value) return showErrorDialog("Please select the Priority Pption!");
 
-    const dataArrIndex = taskData.findIndex(task => task.id === trackCurrentTask?.id)
+    const dataArrIndex = taskData.findIndex(
+        (task) => task.id === trackCurrentTask?.id
+    );
     const newTask: Task = {
         id: generateTaskId(title.value),
         title: removeSpecialChars(title.value),
         description: removeSpecialChars(description.value),
         status: status.value as Status,
         priority: priority.value as Priority,
-    }
+    };
 
     if (dataArrIndex === -1) {
         taskData.unshift(newTask);
@@ -81,10 +102,19 @@ const addOrUpdateTask = () => {
     resetTask();
 };
 
-const updateTaskContainer = () => {
-    Object.values(dom.containers).forEach(container => (container.innerHTML = ""));
+const showErrorDialog = (message: string) => {
+    if (dom.dialogMessage.errorInputMsg) {
+        dom.dialogMessage.errorInputMsg.textContent = message;
+        dom.dialogMessage.errorInputMsgBox.showModal();
+    }
+};
 
-    taskData.forEach(task => {
+const updateTaskContainer = () => {
+    Object.values(dom.containers).forEach(
+        (container) => (container.innerHTML = "")
+    );
+
+    taskData.forEach((task) => {
         const taskEl = document.createElement("div");
         taskEl.className = "task";
         taskEl.id = task.id;
@@ -100,13 +130,13 @@ const updateTaskContainer = () => {
         });
 
         switch (task.status) {
-            case "todo":
+            case Status.Todo:
                 dom.containers.todo.appendChild(taskEl);
                 break;
-            case "inProgress":
+            case Status.InProgress:
                 dom.containers.inProgress.appendChild(taskEl);
                 break;
-            case "done":
+            case Status.Done:
                 dom.containers.done.appendChild(taskEl);
                 break;
         }
@@ -116,7 +146,7 @@ const updateTaskContainer = () => {
 };
 
 const bindTaskCardActions = () => {
-    Object.values(dom.containers).forEach(container => {
+    Object.values(dom.containers).forEach((container) => {
         container.addEventListener("click", (e) => {
             const target = e.target as HTMLButtonElement;
             const taskEl = target.closest(".task") as HTMLElement;
@@ -130,10 +160,26 @@ const bindTaskCardActions = () => {
             }
         });
     });
-}
+};
+
+const closeDialog = () => {
+    dom.buttons.closeForm.addEventListener("click", () => {
+        dom.dialogMessage.confirmCloseDialog.showModal();
+    });
+
+    dom.buttons.cancelDialog.addEventListener("click", () => {
+        saveTasksToStorage();
+        dom.form.classList.toggle("hidden");
+        dom.dialogMessage.confirmCloseDialog.close();
+    });
+
+    dom.buttons.discardDialog.addEventListener("click", () => {
+        dom.dialogMessage.confirmCloseDialog.close();
+    });
+};
 
 const editTask = (taskId: string) => {
-    const task = taskData.find(task => task.id === taskId);
+    const task = taskData.find((task) => task.id === taskId);
     if (!task) return;
 
     trackCurrentTask = task;
@@ -144,11 +190,11 @@ const editTask = (taskId: string) => {
     dom.inputs.priority.value = task.priority;
 
     dom.buttons.submit.innerText = "Update Task";
-    dom.form.classList.toggle("hidden");
+    dom.form.classList.remove("hidden");
 };
 
 const deleteTask = (taskId: string) => {
-    taskData = taskData.filter(task => task.id !== taskId);
+    taskData = taskData.filter((task) => task.id !== taskId);
     saveTasksToStorage();
     updateTaskContainer();
 };
@@ -164,20 +210,17 @@ const resetTask = () => {
 };
 
 const updateTaskStatus = (taskId: string, newStatus: string) => {
-    const validStatus: Status[] = ["todo", "inProgress", "done"];
-    
-    if (!validStatus.includes(newStatus as Status)) return;
+    if (!Object.values(Status).includes(newStatus as Status)) return;
 
-    const taskIndex = taskData.find(task=> task.id === taskId);
-    if (taskIndex) {
-        taskIndex.status = newStatus as Status;
+    const task = taskData.find((task) => task.id === taskId);
+    if (task) {
+        task.status = newStatus as Status;
         saveTasksToStorage();
     }
-}
+};
 
 const initializeDragAndDrop = () => {
     Object.values(dom.containers).forEach((container) => {
-        // Allow drop
         container.addEventListener("dragover", (e: DragEvent) => {
             e.preventDefault();
             e.stopPropagation();
@@ -188,18 +231,12 @@ const initializeDragAndDrop = () => {
             container.classList.remove("drag-over");
         });
 
-        // container.addEventListener("dragleave", (e: DragEvent) => {
-        //     e.preventDefault();
-        //     container.classList.remove("drag-over")
-        // });
-
-        // Handle drop
         container.addEventListener("drop", (e: DragEvent) => {
             e.preventDefault();
             container.classList.remove("drag-over");
-            
+
             const taskId = e.dataTransfer?.getData("text/plain");
-            const newStatus = container.id.replace("-tasks", '') as Status;
+            const newStatus = container.id.replace("-tasks", "") as Status;
 
             if (taskId) {
                 updateTaskStatus(taskId, newStatus);
@@ -212,7 +249,7 @@ const initializeDragAndDrop = () => {
 const bindUIEvents = () => {
     dom.form.addEventListener("submit", (e) => {
         e.preventDefault();
-        addOrUpdateTask(); 
+        addOrUpdateTask();
     });
 
     dom.buttons.openForm.addEventListener("click", () => {
@@ -220,6 +257,7 @@ const bindUIEvents = () => {
     });
 
     dom.buttons.closeForm.addEventListener("click", () => {
+        resetTask();
         dom.form.classList.add("hidden");
     });
 };
@@ -228,6 +266,7 @@ const init = () => {
     updateTaskContainer();
     initializeDragAndDrop();
     bindUIEvents();
+    closeDialog();
 };
 
 document.addEventListener("DOMContentLoaded", init);

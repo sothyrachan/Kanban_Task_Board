@@ -1,49 +1,53 @@
 @import "tailwindcss";
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .drag-over {
-    border: 2px dashed #4a5568;
-    background-color: rgba(74, 85, 104, 0.1);
+  @apply border-dashed border-2 border-blue-500 bg-blue-50;
 }
 
 .task {
-    cursor: grab;
+  @apply bg-white p-4 rounded-lg shadow transition hover:shadow-md hover:bg-gray-50 cursor-grab select-none;
 }
 
 .task:active {
-    cursor: grabbing;
-}
-
-.task {
-    cursor: grab;
-    user-select: none;
-    background: white;
-    padding: 1rem;
-    margin-bottom: 0.5rem;
-    border-radius: 0.25rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-}
-
-.task:active {
-    cursor: grabbing;
-}
-
-.drag-over {
-    border: 2px dashed #4a5568;
-    background-color: rgba(74, 85, 104, 0.1);
+  @apply cursor-grabbing;
 }
 
 .task-list {
-    min-height: 200px;  /* Add minimum height for empty lists */
-    padding: 1rem;
-    border: 2px solid transparent; /* For drop target visibility */
+  @apply min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200;
 }
 
 .column {
-    display: flex;
-    flex-direction: column;
-    min-height: 300px; /* Ensure column is always visible */
+  @apply flex flex-col min-h-[300px];
+}
+
+.btn {
+  @apply inline-block mt-2 px-4 py-1 text-sm font-semibold rounded transition duration-150;
+}
+
+.btn:hover {
+  @apply opacity-90;
+}
+
+.btn-edit {
+  @apply bg-yellow-500 text-white hover:bg-yellow-600;
+}
+
+.btn-delete {
+  @apply bg-red-500 text-white hover:bg-red-600 ml-2;
+}
+
+.task {
+  @apply transition-transform duration-200 ease-in-out;
+}
+
+.task.dragging {
+  transform: rotate(2deg) scale(0.98);
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.4);
 }

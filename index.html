@@ -129,40 +129,59 @@
             </div>
           </form>
         </dialog>
+        <dialog
+          id="error-dialog"
+          class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md p-4 max-w-sm w-full bg-white shadow-lg space-y-4 text-center"
+        >
+          <form method="dialog" class="space-y-4">
+            <p
+              id="error-dialog-message"
+              class="text-red-600 font-medium text-lg"
+            ></p>
+            <button
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold"
+            >
+              OK
+            </button>
+          </form>
+        </dialog>
       </section>
 
-<!-- Task Columns Section -->
-<section class="kanban-columns grid grid-cols-1 md:grid-cols-3 gap-6" aria-label="Task Columns">
-    <!-- Todo Column -->
-    <div class="column bg-white rounded shadow p-4 space-y-4">
-        <h2 class="text-xl font-semibold border-b pb-2">To Do</h2>
-        <div 
-            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200" 
-            id="todo-tasks" 
-            data-status="todo">
+      <!-- Task Columns Section -->
+      <section
+        class="kanban-columns grid grid-cols-1 md:grid-cols-3 gap-6"
+        aria-label="Task Columns"
+      >
+        <!-- Todo Column -->
+        <div class="column bg-white rounded shadow p-4 space-y-4">
+          <h2 class="text-xl font-semibold border-b pb-2">To Do</h2>
+          <div
+            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200"
+            id="todo-tasks"
+            data-status="todo"
+          ></div>
         </div>
-    </div>
 
-    <!-- In Progress Column -->
-    <div class="column bg-white rounded shadow p-4 space-y-4">
-        <h2 class="text-xl font-semibold border-b pb-2">In Progress</h2>
-        <div 
-            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200" 
-            id="in-progress-tasks" 
-            data-status="in-progress">
+        <!-- In Progress Column -->
+        <div class="column bg-white rounded shadow p-4 space-y-4">
+          <h2 class="text-xl font-semibold border-b pb-2">In Progress</h2>
+          <div
+            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200"
+            id="in-progress-tasks"
+            data-status="in-progress"
+          ></div>
         </div>
-    </div>
 
-    <!-- Done Column -->
-    <div class="column bg-white rounded shadow p-4 space-y-4">
-        <h2 class="text-xl font-semibold border-b pb-2">Done</h2>
-        <div 
-            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200" 
-            id="done-tasks" 
-            data-status="done">
+        <!-- Done Column -->
+        <div class="column bg-white rounded shadow p-4 space-y-4">
+          <h2 class="text-xl font-semibold border-b pb-2">Done</h2>
+          <div
+            class="task-list space-y-2 min-h-[200px] p-4 border-2 border-transparent transition-colors duration-200"
+            id="done-tasks"
+            data-status="done"
+          ></div>
         </div>
-    </div>
-</section>
+      </section>
     </main>
 
     <footer
