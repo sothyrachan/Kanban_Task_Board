@@ -36,9 +36,20 @@ const dom = {
         priority: document.getElementById("priority") as HTMLSelectElement,
     },
     dialogMessage: {
-        confirmCloseDialog : document.getElementById("confirm-close-dialog") as HTMLDialogElement,
+        confirmCloseDialog: document.getElementById("confirm-close-dialog") as HTMLDialogElement,
         errorInputMsgBox: document.getElementById("error-dialog") as HTMLDialogElement,
         errorInputMsg: document.getElementById("error-dialog-message") as HTMLElement,
+    },
+    dialogFunctions: {
+        onCloseFormClick: () => dom.dialogMessage.confirmCloseDialog.showModal(),
+        onCancelDialogClick: () => {
+            saveTasksToStorage();
+            dom.form.classList.toggle("hidden");
+            dom.dialogMessage.confirmCloseDialog.close();
+        },
+        onDiscardDialogClick: () => {
+            dom.dialogMessage.confirmCloseDialog.close();
+        },
     },
     containers: {
         todo: document.getElementById("todo-tasks") as HTMLDivElement,
@@ -49,6 +60,7 @@ const dom = {
 
 let taskData: Task[] = JSON.parse(localStorage.getItem("data") || "[]");
 let trackCurrentTask: Task | null = null;
+let userIsEditingTask = false;
 
 const removeSpecialChars = (value: string) =>
     value.trim().replace(/[^A-Za-z0-9\-\s]/g, "");
@@ -163,19 +175,9 @@ const bindTaskCardActions = () => {
 };
 
 const closeDialog = () => {
-    dom.buttons.closeForm.addEventListener("click", () => {
-        dom.dialogMessage.confirmCloseDialog.showModal();
-    });
-
-    dom.buttons.cancelDialog.addEventListener("click", () => {
-        saveTasksToStorage();
-        dom.form.classList.toggle("hidden");
-        dom.dialogMessage.confirmCloseDialog.close();
-    });
-
-    dom.buttons.discardDialog.addEventListener("click", () => {
-        dom.dialogMessage.confirmCloseDialog.close();
-    });
+    dom.buttons.closeForm.addEventListener("click", dom.dialogFunctions.onCloseFormClick);
+    dom.buttons.cancelDialog.addEventListener("click", dom.dialogFunctions.onCancelDialogClick);
+    dom.buttons.discardDialog.addEventListener("click", dom.dialogFunctions.onDiscardDialogClick);
 };
 
 const editTask = (taskId: string) => {
