@@ -1,4 +1,5 @@
 import "./output.css";
+import { removeSpecialChars, generateTaskId } from "./utils";
 
 enum Status {
     Todo = "todo",
@@ -44,11 +45,16 @@ const dom = {
         onCloseFormClick: () => dom.dialogMessage.confirmCloseDialog.showModal(),
         onCancelDialogClick: () => {
             saveTasksToStorage();
-            dom.form.classList.toggle("hidden");
+            dom.dialogFunctions.closeForm();
             dom.dialogMessage.confirmCloseDialog.close();
         },
         onDiscardDialogClick: () => {
+            dom.dialogFunctions.closeForm();
             dom.dialogMessage.confirmCloseDialog.close();
+        },
+        closeForm: () => {
+            dom.form.classList.add("hidden");
+            resetTask();
         },
     },
     containers: {
@@ -61,15 +67,6 @@ const dom = {
 let taskData: Task[] = JSON.parse(localStorage.getItem("data") || "[]");
 let trackCurrentTask: Task | null = null;
 let userIsEditingTask = false;
-
-const removeSpecialChars = (value: string) =>
-    value.trim().replace(/[^A-Za-z0-9\-\s]/g, "");
-
-const generateTaskId = (title: string) =>
-    `${removeSpecialChars(title)
-        .toLowerCase()
-        .split(" ")
-        .join("-")}-${Date.now()}`;
 
 const saveTasksToStorage = () =>
     localStorage.setItem("data", JSON.stringify(taskData));
@@ -90,7 +87,7 @@ const addOrUpdateTask = () => {
 
     if (!title.value.trim()) return showErrorDialog("Please input the Task Title!");
     if (!status.value) return showErrorDialog("Please select the Status Option!");
-    if (!priority.value) return showErrorDialog("Please select the Priority Pption!");
+    if (!priority.value) return showErrorDialog("Please select the Priority Option!");
 
     const dataArrIndex = taskData.findIndex(
         (task) => task.id === trackCurrentTask?.id
@@ -175,7 +172,7 @@ const bindTaskCardActions = () => {
 };
 
 const closeDialog = () => {
-    dom.buttons.closeForm.addEventListener("click", dom.dialogFunctions.onCloseFormClick);
+   // dom.buttons.closeForm.addEventListener("click", dom.dialogFunctions.onCloseFormClick);
     dom.buttons.cancelDialog.addEventListener("click", dom.dialogFunctions.onCancelDialogClick);
     dom.buttons.discardDialog.addEventListener("click", dom.dialogFunctions.onDiscardDialogClick);
 };
@@ -208,7 +205,8 @@ const resetTask = () => {
     dom.inputs.status.value = "";
     dom.inputs.priority.value = "";
     trackCurrentTask = null;
-    dom.form.classList.toggle("hidden");
+    userIsEditingTask = false;
+    dom.dialogFunctions.closeForm();
 };
 
 const updateTaskStatus = (taskId: string, newStatus: string) => {
