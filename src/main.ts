@@ -44,17 +44,10 @@ const dom = {
     dialogFunctions: {
         onCloseFormClick: () => dom.dialogMessage.confirmCloseDialog.showModal(),
         onCancelDialogClick: () => {
-            saveTasksToStorage();
-            dom.dialogFunctions.closeForm();
-            dom.dialogMessage.confirmCloseDialog.close();
+            dom.dialogMessage.confirmCloseDialog.showModal();
         },
         onDiscardDialogClick: () => {
-            dom.dialogFunctions.closeForm();
             dom.dialogMessage.confirmCloseDialog.close();
-        },
-        closeForm: () => {
-            dom.form.classList.add("hidden");
-            resetTask();
         },
     },
     containers: {
@@ -172,7 +165,7 @@ const bindTaskCardActions = () => {
 };
 
 const closeDialog = () => {
-   // dom.buttons.closeForm.addEventListener("click", dom.dialogFunctions.onCloseFormClick);
+    dom.buttons.closeForm.addEventListener("click", dom.dialogFunctions.onCloseFormClick);
     dom.buttons.cancelDialog.addEventListener("click", dom.dialogFunctions.onCancelDialogClick);
     dom.buttons.discardDialog.addEventListener("click", dom.dialogFunctions.onDiscardDialogClick);
 };
@@ -206,7 +199,7 @@ const resetTask = () => {
     dom.inputs.priority.value = "";
     trackCurrentTask = null;
     userIsEditingTask = false;
-    dom.dialogFunctions.closeForm();
+    dom.form.classList.add("hidden");
 };
 
 const updateTaskStatus = (taskId: string, newStatus: string) => {
