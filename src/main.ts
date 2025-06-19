@@ -47,6 +47,7 @@ const dom = {
             dom.dialogMessage.confirmCloseDialog.showModal();
         },
         onDiscardDialogClick: () => {
+            resetTask();
             dom.dialogMessage.confirmCloseDialog.close();
         },
     },
@@ -59,7 +60,6 @@ const dom = {
 
 let taskData: Task[] = JSON.parse(localStorage.getItem("data") || "[]");
 let trackCurrentTask: Task | null = null;
-let userIsEditingTask = false;
 
 const saveTasksToStorage = () =>
     localStorage.setItem("data", JSON.stringify(taskData));
@@ -165,10 +165,20 @@ const bindTaskCardActions = () => {
 };
 
 const closeDialog = () => {
-    dom.buttons.closeForm.addEventListener("click", dom.dialogFunctions.onCloseFormClick);
     dom.buttons.cancelDialog.addEventListener("click", dom.dialogFunctions.onCancelDialogClick);
     dom.buttons.discardDialog.addEventListener("click", dom.dialogFunctions.onDiscardDialogClick);
 };
+
+const editedForm = (): boolean => {
+    if (!trackCurrentTask) return false;
+
+    return (
+        removeSpecialChars(dom.inputs.title.value) !== trackCurrentTask.title ||
+        removeSpecialChars(dom.inputs.description.value) !== trackCurrentTask.description ||
+        dom.inputs.status.value !== trackCurrentTask.status ||
+        dom.inputs.priority.value !== trackCurrentTask.priority
+    );
+}
 
 const editTask = (taskId: string) => {
     const task = taskData.find((task) => task.id === taskId);
@@ -198,7 +208,6 @@ const resetTask = () => {
     dom.inputs.status.value = "";
     dom.inputs.priority.value = "";
     trackCurrentTask = null;
-    userIsEditingTask = false;
     dom.form.classList.add("hidden");
 };
 
@@ -250,8 +259,12 @@ const bindUIEvents = () => {
     });
 
     dom.buttons.closeForm.addEventListener("click", () => {
-        resetTask();
-        dom.form.classList.add("hidden");
+        if (editedForm()) {
+            dom.dialogFunctions.onCloseFormClick();
+        } else {
+            resetTask();
+            dom.form.classList.add("hidden");
+        }
     });
 };
 

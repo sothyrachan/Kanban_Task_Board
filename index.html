@@ -107,7 +107,10 @@
           </fieldset>
         </form>
 
-        <dialog id="confirm-close-dialog" class="rounded-md p-4">
+        <dialog
+          id="confirm-close-dialog"
+          class="rounded-md p-6 fixed inset-0 m-auto bg-white shadow-lg"
+        >
           <form method="dialog" class="space-y-4">
             <p class="text-lg">Discard unsaved changes?</p>
             <div
@@ -116,19 +119,20 @@
             >
               <button
                 id="cancel-dialog-btn"
-                class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+                class="w-25 bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
               >
                 Cancel
               </button>
               <button
                 id="discard-dialog-btn"
-                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                class="w-25 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
               >
                 Discard
               </button>
             </div>
           </form>
         </dialog>
+
         <dialog
           id="error-dialog"
           class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md p-4 max-w-sm w-full bg-white shadow-lg space-y-4 text-center"
