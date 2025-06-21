@@ -1,25 +1,8 @@
 import "./output.css";
+
 import { removeSpecialChars, generateTaskId } from "./utils";
+import { Status, Priority, type Task } from "./taskService";
 
-enum Status {
-    Todo = "todo",
-    InProgress = "in-progress",
-    Done = "done",
-}
-
-enum Priority {
-    Low = "low",
-    Medium = "medium",
-    High = "high",
-}
-
-interface Task {
-    id: string;
-    title: string;
-    description: string;
-    status: Status;
-    priority: Priority;
-}
 
 const dom = {
     buttons: {
