@@ -1,5 +1,4 @@
-// taskService.ts
-
+// ====== Enums ======
 export enum Status {
     Todo = "todo",
     InProgress = "in-progress",
@@ -12,6 +11,7 @@ export enum Priority {
     High = "high",
 }
 
+// ====== Task Type ======
 export interface Task {
     id: string;
     title: string;
@@ -20,10 +20,12 @@ export interface Task {
     priority: Priority;
 }
 
+// ====== Local Storage ======
 export const saveTasksToStorage = (data: Task[]) =>
     localStorage.setItem("data", JSON.stringify(data));
 
-export const getTaskElementHTML = (task: Task) => `
+// ====== UI Helper ======
+export const getTaskElementHTML = (task: Task): string => `
   <p class="text-sm"><strong>Title:</strong> ${task.title}</p>
   <p class="text-sm"><strong>Description:</strong> ${task.description}</p>
   <p class="text-sm"><strong>Status:</strong> ${task.status}</p>

@@ -1,9 +1,17 @@
+// main.ts
+
+// ====== Imports ======
 import "./output.css";
-
 import { removeSpecialChars, generateTaskId } from "./utils";
-import { Status, Priority, type Task } from "./taskService";
+import {
+    Status,
+    Priority,
+    type Task,
+    getTaskElementHTML,
+    saveTasksToStorage,
+} from "./taskService";
 
-
+// ====== DOM References ======
 const dom = {
     buttons: {
         openForm: document.getElementById("open-task-form-btn") as HTMLButtonElement,
@@ -26,9 +34,7 @@ const dom = {
     },
     dialogFunctions: {
         onCloseFormClick: () => dom.dialogMessage.confirmCloseDialog.showModal(),
-        onCancelDialogClick: () => {
-            dom.dialogMessage.confirmCloseDialog.showModal();
-        },
+        onCancelDialogClick: () => dom.dialogMessage.confirmCloseDialog.showModal(),
         onDiscardDialogClick: () => {
             resetTask();
             dom.dialogMessage.confirmCloseDialog.close();
@@ -41,23 +47,18 @@ const dom = {
     },
 };
 
-let taskData: Task[] = JSON.parse(localStorage.getItem("data") || "[]");
+// ====== State ======
+let taskData: Task[] = [];
+
+try {
+    taskData = JSON.parse(localStorage.getItem("data") || "[]");
+} catch {
+    taskData = [];
+}
+
 let trackCurrentTask: Task | null = null;
 
-const saveTasksToStorage = () =>
-    localStorage.setItem("data", JSON.stringify(taskData));
-
-const getTaskElementHTML = (task: Task) => `
-    <p class="text-sm"><strong>Title:</strong> ${task.title}</p>
-    <p class="text-sm"><strong>Description:</strong> ${task.description}</p>
-    <p class="text-sm"><strong>Status:</strong> ${task.status}</p>
-    <p class="text-sm"><strong>Priority:</strong> ${task.priority}</p>
-    <div class="mt-2 flex gap-2">
-      <button type="button" class="btn btn-edit">Edit</button>
-      <button type="button" class="btn btn-delete">Delete</button>
-    </div>
-`;
-
+// ====== Core Logic ======
 const addOrUpdateTask = () => {
     const { title, description, status, priority } = dom.inputs;
 
@@ -65,9 +66,8 @@ const addOrUpdateTask = () => {
     if (!status.value) return showErrorDialog("Please select the Status Option!");
     if (!priority.value) return showErrorDialog("Please select the Priority Option!");
 
-    const dataArrIndex = taskData.findIndex(
-        (task) => task.id === trackCurrentTask?.id
-    );
+    const dataArrIndex = taskData.findIndex(task => task.id === trackCurrentTask?.id);
+
     const newTask: Task = {
         id: generateTaskId(title.value),
         title: removeSpecialChars(title.value),
@@ -82,24 +82,58 @@ const addOrUpdateTask = () => {
         taskData[dataArrIndex] = newTask;
     }
 
-    saveTasksToStorage();
+    saveTasksToStorage(taskData);
     updateTaskContainer();
     resetTask();
 };
 
-const showErrorDialog = (message: string) => {
-    if (dom.dialogMessage.errorInputMsg) {
-        dom.dialogMessage.errorInputMsg.textContent = message;
-        dom.dialogMessage.errorInputMsgBox.showModal();
-    }
+const editTask = (taskId: string) => {
+    const task = taskData.find(task => task.id === taskId);
+    if (!task) return;
+
+    trackCurrentTask = { ...task };
+
+    dom.inputs.title.value = task.title;
+    dom.inputs.description.value = task.description;
+    dom.inputs.status.value = task.status;
+    dom.inputs.priority.value = task.priority;
+
+    dom.buttons.submit.innerText = "Update Task";
+    dom.form.classList.remove("hidden");
 };
 
-const updateTaskContainer = () => {
-    Object.values(dom.containers).forEach(
-        (container) => (container.innerHTML = "")
-    );
+const deleteTask = (taskId: string) => {
+    taskData = taskData.filter(task => task.id !== taskId);
+    saveTasksToStorage(taskData);
+    updateTaskContainer();
+};
 
-    taskData.forEach((task) => {
+const resetTask = () => {
+    dom.buttons.submit.innerText = "Add Task";
+    dom.inputs.title.value = "";
+    dom.inputs.description.value = "";
+    dom.inputs.status.value = "";
+    dom.inputs.priority.value = "";
+    trackCurrentTask = null;
+    dom.form.classList.add("hidden");
+};
+
+const editedForm = (): boolean => {
+    if (!trackCurrentTask) return false;
+
+    return (
+        removeSpecialChars(dom.inputs.title.value) !== trackCurrentTask.title ||
+        removeSpecialChars(dom.inputs.description.value) !== trackCurrentTask.description ||
+        dom.inputs.status.value !== trackCurrentTask.status ||
+        dom.inputs.priority.value !== trackCurrentTask.priority
+    );
+};
+
+// ====== UI Updates ======
+const updateTaskContainer = () => {
+    Object.values(dom.containers).forEach(container => (container.innerHTML = ""));
+
+    taskData.forEach(task => {
         const taskEl = document.createElement("div");
         taskEl.className = "task";
         taskEl.id = task.id;
@@ -130,12 +164,19 @@ const updateTaskContainer = () => {
     bindTaskCardActions();
 };
 
+const showErrorDialog = (message: string) => {
+    if (dom.dialogMessage.errorInputMsg) {
+        dom.dialogMessage.errorInputMsg.textContent = message;
+        dom.dialogMessage.errorInputMsgBox.showModal();
+    }
+};
+
+// ====== Event Binding ======
 const bindTaskCardActions = () => {
-    Object.values(dom.containers).forEach((container) => {
+    Object.values(dom.containers).forEach(container => {
         container.addEventListener("click", (e) => {
             const target = e.target as HTMLButtonElement;
             const taskEl = target.closest(".task") as HTMLElement;
-
             if (!target.matches(".btn") || !taskEl) return;
 
             if (target.textContent === "Edit") {
@@ -147,88 +188,9 @@ const bindTaskCardActions = () => {
     });
 };
 
-const closeDialog = () => {
+const bindDialogEvents = () => {
     dom.buttons.cancelDialog.addEventListener("click", dom.dialogFunctions.onCancelDialogClick);
     dom.buttons.discardDialog.addEventListener("click", dom.dialogFunctions.onDiscardDialogClick);
-};
-
-const editedForm = (): boolean => {
-    if (!trackCurrentTask) return false;
-
-    return (
-        removeSpecialChars(dom.inputs.title.value) !== trackCurrentTask.title ||
-        removeSpecialChars(dom.inputs.description.value) !== trackCurrentTask.description ||
-        dom.inputs.status.value !== trackCurrentTask.status ||
-        dom.inputs.priority.value !== trackCurrentTask.priority
-    );
-}
-
-const editTask = (taskId: string) => {
-    const task = taskData.find((task) => task.id === taskId);
-    if (!task) return;
-
-    trackCurrentTask = task;
-
-    dom.inputs.title.value = task.title;
-    dom.inputs.description.value = task.description;
-    dom.inputs.status.value = task.status;
-    dom.inputs.priority.value = task.priority;
-
-    dom.buttons.submit.innerText = "Update Task";
-    dom.form.classList.remove("hidden");
-};
-
-const deleteTask = (taskId: string) => {
-    taskData = taskData.filter((task) => task.id !== taskId);
-    saveTasksToStorage();
-    updateTaskContainer();
-};
-
-const resetTask = () => {
-    dom.buttons.submit.innerText = "Add Task";
-    dom.inputs.title.value = "";
-    dom.inputs.description.value = "";
-    dom.inputs.status.value = "";
-    dom.inputs.priority.value = "";
-    trackCurrentTask = null;
-    dom.form.classList.add("hidden");
-};
-
-const updateTaskStatus = (taskId: string, newStatus: string) => {
-    if (!Object.values(Status).includes(newStatus as Status)) return;
-
-    const task = taskData.find((task) => task.id === taskId);
-    if (task) {
-        task.status = newStatus as Status;
-        saveTasksToStorage();
-    }
-};
-
-const initializeDragAndDrop = () => {
-    Object.values(dom.containers).forEach((container) => {
-        container.addEventListener("dragover", (e: DragEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            container.classList.add("drag-over");
-        });
-
-        container.addEventListener("dragleave", () => {
-            container.classList.remove("drag-over");
-        });
-
-        container.addEventListener("drop", (e: DragEvent) => {
-            e.preventDefault();
-            container.classList.remove("drag-over");
-
-            const taskId = e.dataTransfer?.getData("text/plain");
-            const newStatus = container.id.replace("-tasks", "") as Status;
-
-            if (taskId) {
-                updateTaskStatus(taskId, newStatus);
-                updateTaskContainer();
-            }
-        });
-    });
 };
 
 const bindUIEvents = () => {
@@ -251,11 +213,49 @@ const bindUIEvents = () => {
     });
 };
 
+// ====== Drag and Drop ======
+const updateTaskStatus = (taskId: string, newStatus: string) => {
+    if (!Object.values(Status).includes(newStatus as Status)) return;
+
+    const task = taskData.find(task => task.id === taskId);
+    if (task) {
+        task.status = newStatus as Status;
+        saveTasksToStorage(taskData);
+        updateTaskContainer();
+    }
+};
+
+const initializeDragAndDrop = () => {
+    Object.values(dom.containers).forEach(container => {
+        container.addEventListener("dragover", (e: DragEvent) => {
+            e.preventDefault();
+            container.classList.add("drag-over");
+        });
+
+        container.addEventListener("dragleave", () => {
+            container.classList.remove("drag-over");
+        });
+
+        container.addEventListener("drop", (e: DragEvent) => {
+            e.preventDefault();
+            container.classList.remove("drag-over");
+
+            const taskId = e.dataTransfer?.getData("text/plain");
+            const newStatus = container.id.replace("-tasks", "") as Status;
+
+            if (taskId) {
+                updateTaskStatus(taskId, newStatus);
+            }
+        });
+    });
+};
+
+// ====== App Init ======
 const init = () => {
     updateTaskContainer();
     initializeDragAndDrop();
     bindUIEvents();
-    closeDialog();
+    bindDialogEvents();
 };
 
 document.addEventListener("DOMContentLoaded", init);
