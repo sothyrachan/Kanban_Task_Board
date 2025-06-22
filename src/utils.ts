@@ -16,4 +16,4 @@ export function generateTaskId(title: string): string {
         .split(" ")
         .join("-");
     return `${slug}-${Date.now()}`;
-}
+} 
