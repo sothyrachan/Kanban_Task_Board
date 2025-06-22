@@ -1,5 +1,3 @@
-// main.ts
-
 // ====== Imports ======
 import "./output.css";
 import { removeSpecialChars, generateTaskId } from "./utils";

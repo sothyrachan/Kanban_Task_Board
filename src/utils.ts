@@ -1,5 +1,3 @@
-// utils.ts
-
 // ====== Helper Functions ======
 
 /**
