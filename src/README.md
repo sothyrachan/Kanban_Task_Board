@@ -133,9 +133,3 @@ This file includes small helper functions used in multiple places.
 ## 💾 Where are my tasks saved?
 
 Your tasks are saved in the **browser’s local storage**, so even if you refresh the page, your tasks won’t disappear!
-
----
-
-## 📌 How does drag and drop work?
-
-You can grab a task by its box and drop it into another column (To Do → Done). The app updates the task’s status automatically.
