@@ -20,57 +20,78 @@ This is the **main file** where the app connects to the webpage (HTML) and makes
 
 #### `addOrUpdateTask()`
 
-* Adds a new task or updates an existing one.
-* Makes sure required fields like title, status, and priority are filled in.
-* Saves tasks to local storage and refreshes the task display.
+* Uses `FormData` to gather input values from the task form.
+* Checks if `trackCurrentTask` is set – if so, it's an update; otherwise, it's a new task.
+* Validates that title, status, and priority fields are not empty.
+* Calls `generateTaskId()` if creating a new task.
+* Uses `taskData.push()` to add or `.map()` to update the existing task.
+* Saves the array with `saveTasksToStorage()` and refreshes UI with `updateTaskContainer()`.
 
 #### `showErrorDialog(message)`
 
-* Shows an error message in a popup dialog when the user forgets to fill something in.
+* Takes a string `message` and updates the dialog box content.
+* Uses `showModal()` on a native HTML `<dialog>` element to pop up the error.
 
 #### `updateTaskContainer()`
 
-* Clears all the task columns and re-adds every task to the correct column (To Do, In Progress, Done).
+* Clears all task containers (`todo`, `in-progress`, `done`) using `innerHTML = ""`.
+* Loops through `taskData` and inserts each task's HTML using `getTaskElementHTML()`.
+* Uses `insertAdjacentHTML()` to insert HTML into the appropriate container.
+* Calls `bindTaskCardActions()` to activate buttons on the new tasks.
 
 #### `bindTaskCardActions()`
 
-* Adds click events to each task’s **Edit** and **Delete** buttons.
+* Uses `querySelectorAll()` to find all `.btn-edit` and `.btn-delete` buttons.
+* Adds `addEventListener('click', ...)` to each button to trigger `editTask()` or `deleteTask()`.
 
 #### `editTask(taskId)`
 
-* Fills the form with task details so you can update them.
+* Uses `.find()` to locate the task by ID from `taskData`.
+* Populates the form fields with the task’s values (title, description, etc.).
+* Sets `trackCurrentTask` so `addOrUpdateTask()` knows to update it.
+* Opens the form modal.
 
 #### `deleteTask(taskId)`
 
-* Deletes a task based on its ID.
+* Uses `.filter()` to remove the task with the matching ID.
+* Saves the updated array to `localStorage` and calls `updateTaskContainer()`.
 
 #### `resetTask()`
 
-* Clears the form and resets everything so you can add a new task.
+* Clears all form inputs using `.value = ''` and resets `trackCurrentTask = null`.
+* Closes the form modal.
 
 #### `editedForm()`
 
-* Checks if the form has been changed after selecting a task (used to confirm before closing without saving).
+* Compares current form values with the values of `trackCurrentTask`.
+* Returns `true` if any field is changed; otherwise, `false`.
 
 #### `updateTaskStatus(taskId, newStatus)`
 
-* Updates the status of a task (e.g., moves it from "To Do" to "Done").
+* Finds the task by ID and updates its `status` property.
+* Saves and re-renders the tasks.
 
 #### `initializeDragAndDrop()`
 
-* Enables drag-and-drop functionality so you can move tasks between columns.
+* Uses `dragstart`, `dragover`, and `drop` events.
+* On drop, it calls `updateTaskStatus()` with the new column’s status.
 
 #### `bindUIEvents()`
 
-* Links buttons (Add Task, Close Form, etc.) to their actions.
+* Connects UI elements to their actions:
+
+  * Add button opens the form
+  * Cancel/Close resets the form
+  * Submit button triggers `addOrUpdateTask()`
 
 #### `bindDialogEvents()`
 
-* Links Cancel/Discard dialog buttons to their actions.
+* Connects dialog cancel/discard buttons to reset or keep changes.
 
 #### `init()`
 
-* The first function that runs when the page loads. It sets up everything.
+* Calls all setup functions (`bindUIEvents()`, `bindDialogEvents()`, `initializeDragAndDrop()`).
+* Loads tasks from storage and displays them.
 
 ---
 
@@ -82,11 +103,15 @@ This file stores shared things that describe what a task looks like and helps wi
 
 #### `Status`
 
-* Describes the stage a task is in: `Todo`, `InProgress`, or `Done`.
+* Used to identify task stage:
+
+  * `Todo`, `InProgress`, `Done`
 
 #### `Priority`
 
-* Describes how important a task is: `Low`, `Medium`, or `High`.
+* Used to mark task importance:
+
+  * `Low`, `Medium`, `High`
 
 ---
 
@@ -94,9 +119,13 @@ This file stores shared things that describe what a task looks like and helps wi
 
 #### `Task`
 
-* A structure that defines what a task looks like:
+* Blueprint for task objects:
 
-  * `id`, `title`, `description`, `status`, `priority`.
+  * `id`: unique string
+  * `title`: string
+  * `description`: string
+  * `status`: one of `Status`
+  * `priority`: one of `Priority`
 
 ---
 
@@ -104,11 +133,14 @@ This file stores shared things that describe what a task looks like and helps wi
 
 #### `saveTasksToStorage(data)`
 
-* Saves your task list to the browser using `localStorage`.
+* Uses `JSON.stringify()` to convert the task array to a string.
+* Stores it using `localStorage.setItem()` under the key "data".
 
 #### `getTaskElementHTML(task)`
 
-* Returns the HTML layout of a task, including its title, description, status, priority, and action buttons.
+* Returns a template literal containing HTML markup.
+* Displays task title, description, status, and priority.
+* Adds Edit and Delete buttons with class names used for event binding.
 
 ---
 
@@ -120,16 +152,23 @@ This file includes small helper functions used in multiple places.
 
 #### `removeSpecialChars(value)`
 
-* Cleans up a string by removing special characters (like @, #, %, etc.).
-* Keeps only letters, numbers, dashes, and spaces.
+* Uses `trim()` to remove whitespace.
+* Uses `replace()` with a regular expression to remove characters except letters, numbers, dashes, and spaces.
 
 #### `generateTaskId(title)`
 
-* Creates a unique ID for each task.
-* Uses the cleaned title + current time to make sure each task ID is different.
+* Calls `removeSpecialChars(title)` to sanitize the input.
+* Converts the title to lowercase and replaces spaces with dashes using `split().join()`.
+* Appends `Date.now()` to ensure a unique ID.
 
 ---
 
 ## 💾 Where are my tasks saved?
 
 Your tasks are saved in the **browser’s local storage**, so even if you refresh the page, your tasks won’t disappear!
+
+---
+
+## 📌 How does drag and drop work?
+
+You can grab a task by its box and drop it into another column (To Do → Done). The app updates the task’s status automatically.
