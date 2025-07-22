@@ -1,9 +1,4 @@
 # 📝 Kanban Board App – README
-
-Welcome! This is a simple web app to help you manage your tasks using drag-and-drop. Below is a beginner-friendly explanation of the different parts of the code and what each function does.
-
----
-
 ## 📁 File: `main.ts`
 
 This is the **main file** where the app connects to the webpage (HTML) and makes everything work.
